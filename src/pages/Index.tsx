@@ -14,6 +14,8 @@ const PLAYER = {
   mana: 320,
   manaMax: 400,
   gold: 1250,
+  coins: 8340,
+  crystals: 47,
   rank: 47,
   stats: {
     strength: 72,
@@ -647,20 +649,47 @@ export default function Index() {
         style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)" }} />
 
       {/* Top bar */}
-      <header className="sticky top-0 z-50 bg-[hsl(0,0%,6%)] border-b border-[hsl(0,0%,14%)] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <span className="font-display text-base font-bold text-[hsl(45,100%,60%)] tracking-[0.2em] uppercase">NEXUS</span>
-          <span className="text-[10px] text-muted-foreground font-mono border border-[hsl(0,0%,20%)] px-1.5 py-0.5">RPG</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <span className="text-[hsl(45,100%,60%)] text-xs">◆</span>
-            <span className="font-mono text-xs text-white">1250</span>
+      <header className="sticky top-0 z-50 bg-[hsl(0,0%,6%)] border-b border-[hsl(0,0%,14%)]">
+        {/* Logo row */}
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
+            <span className="font-display text-base font-bold text-[hsl(45,100%,60%)] tracking-[0.2em] uppercase">NEXUS</span>
+            <span className="text-[10px] text-muted-foreground font-mono border border-[hsl(0,0%,20%)] px-1.5 py-0.5">RPG</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,70%,45%)]" style={{ animation: "pulse 3s ease-in-out infinite" }} />
             <span className="text-[10px] text-muted-foreground font-mono">В сети</span>
+          </div>
+        </div>
+        {/* Resources row */}
+        <div className="px-3 pb-2.5 flex items-center gap-2">
+          {/* Монеты */}
+          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] px-2.5 py-1.5"
+            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
+            <span className="text-base leading-none">🪙</span>
+            <div className="min-w-0">
+              <div className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-none mb-0.5">Монеты</div>
+              <div className="font-display text-sm font-bold text-white leading-none">{PLAYER.coins.toLocaleString()}</div>
+            </div>
+          </div>
+          {/* Золото */}
+          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(45,100%,35%)] px-2.5 py-1.5"
+            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
+            <span className="text-base leading-none">⭐</span>
+            <div className="min-w-0">
+              <div className="text-[9px] text-[hsl(45,100%,50%)] font-mono uppercase tracking-wider leading-none mb-0.5">Золото</div>
+              <div className="font-display text-sm font-bold text-[hsl(45,100%,60%)] leading-none">{PLAYER.gold.toLocaleString()}</div>
+            </div>
+          </div>
+          {/* Кристаллы */}
+          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(195,100%,30%)] px-2.5 py-1.5"
+            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
+            <span className="text-base leading-none">💎</span>
+            <div className="min-w-0">
+              <div className="text-[9px] text-[hsl(195,100%,40%)] font-mono uppercase tracking-wider leading-none mb-0.5">Кристаллы</div>
+              <div className="font-display text-sm font-bold text-[hsl(195,100%,55%)] leading-none">{PLAYER.crystals}</div>
+            </div>
           </div>
         </div>
       </header>
