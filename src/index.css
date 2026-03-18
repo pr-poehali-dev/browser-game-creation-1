@@ -801,3 +801,107 @@
   color: #fff;
   font-weight: bold;
 }
+
+/* ── Duel ── */
+.duel-lvl-easy {
+  color: #4a9b4a;
+  font-weight: bold;
+}
+.duel-lvl-equal {
+  color: #b8860b;
+  font-weight: bold;
+}
+.duel-lvl-hard {
+  color: #9a1010;
+  font-weight: bold;
+}
+
+.duel-arena {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, #f5eec8, #e8dba0);
+  border: 2px solid #c8a050;
+  border-radius: 3px;
+  padding: 12px 10px;
+  margin-bottom: 8px;
+}
+
+.duel-fighter {
+  flex: 1;
+  text-align: center;
+}
+
+.duel-fighter-name {
+  font-weight: bold;
+  font-size: 13px;
+  color: #3a1a00;
+  word-break: break-word;
+}
+
+.duel-fighter-level {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.duel-vs {
+  font-size: 20px;
+  font-weight: bold;
+  color: #7a0a0a;
+  align-self: center;
+  flex-shrink: 0;
+  text-shadow: 1px 1px 0 #fff;
+}
+
+.duel-log {
+  background: #1a0d00;
+  border: 1px solid #5a3800;
+  border-radius: 3px;
+  padding: 8px 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.duel-log-line {
+  line-height: 1.4;
+}
+.duel-log-player {
+  color: #7ecf7e;
+}
+.duel-log-enemy {
+  color: #e07070;
+}
+.duel-log-info {
+  color: #f5d98a;
+}
+
+.duel-result-banner {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  font-family: Georgia, serif;
+  letter-spacing: 4px;
+  padding: 14px;
+  border-radius: 3px;
+  border: 2px solid;
+}
+
+.duel-result-win {
+  background: linear-gradient(135deg, #1a4a1a, #2a6a2a);
+  color: #a0f0a0;
+  border-color: #4a9b4a;
+  text-shadow: 0 0 10px rgba(100, 255, 100, 0.4);
+}
+
+.duel-result-lose {
+  background: linear-gradient(135deg, #4a0a0a, #6a1010);
+  color: #f0a0a0;
+  border-color: #9a1010;
+  text-shadow: 0 0 10px rgba(255, 100, 100, 0.4);
+}

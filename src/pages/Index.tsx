@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-type Screen = "home" | "character" | "diary" | "leaderboard" | "shop" | "achievements";
+type Screen = "home" | "character" | "diary" | "leaderboard" | "shop" | "achievements" | "duel";
 
 const PLAYER = {
   name: "Странник",
@@ -93,7 +93,7 @@ const RARITY_COLOR: Record<string, string> = {
 const MAIN_MENU = [
   { id: "diary" as Screen, label: "Дневник", emoji: "⭐" },
   { id: "diary" as Screen, label: "Задания", emoji: "📜" },
-  { id: "home" as Screen, label: "Дуэль", emoji: "⚔️" },
+  { id: "duel" as Screen, label: "Дуэль", emoji: "⚔️" },
   { id: "home" as Screen, label: "Поселок", emoji: "🏘️" },
   { id: "home" as Screen, label: "Поход", emoji: "🌲" },
   { id: "home" as Screen, label: "Подземелье", emoji: "⛏️" },
@@ -412,6 +412,282 @@ function AchievementsScreen() {
   );
 }
 
+/* ─── Duel opponents pool ─── */
+const CLASSES = ["Паладин", "Маг", "Ассасин", "Рейнджер", "Берсеркер", "Лучник", "Жрец", "Варвар"];
+const NAMES = ["Громила", "Тёмный_Клинок", "Ночная_Тень", "Ледяной", "Кровопийца", "Стальной_Кулак", "Хаос_Рот", "Призрачный", "Костяной", "Вихрь_Смерти", "Огненный", "Теньхвост"];
+
+type Opponent = {
+  id: number;
+  name: string;
+  level: number;
+  class: string;
+  hp: number;
+  hpMax: number;
+  strength: number;
+  agility: number;
+  endurance: number;
+  coins: number;
+  prize: number;
+};
+
+function generateOpponents(playerLevel: number): Opponent[] {
+  return Array.from({ length: 5 }, (_, i) => {
+    const lvlOffset = Math.floor(Math.random() * 5) - 2;
+    const level = Math.max(1, playerLevel + lvlOffset);
+    const base = 50 + level * 4;
+    const str = base + Math.floor(Math.random() * 20) - 10;
+    const agi = base + Math.floor(Math.random() * 20) - 10;
+    const end = base + Math.floor(Math.random() * 20) - 10;
+    const hpMax = 600 + end * 5 + Math.floor(Math.random() * 200);
+    const coins = 3000 + level * 400 + Math.floor(Math.random() * 2000);
+    return {
+      id: i,
+      name: NAMES[Math.floor(Math.random() * NAMES.length)],
+      level,
+      class: CLASSES[Math.floor(Math.random() * CLASSES.length)],
+      hp: hpMax,
+      hpMax,
+      strength: str,
+      agility: agi,
+      endurance: end,
+      coins,
+      prize: Math.floor(coins * 0.25),
+    };
+  });
+}
+
+type BattleLog = { text: string; type: "player" | "enemy" | "info" };
+
+type DuelState = "list" | "fighting" | "result";
+
+/* ─── DuelScreen ─── */
+function DuelScreen({ coins, setCoins }: { coins: number; setCoins: (v: number) => void }) {
+  const [opponents, setOpponents] = useState<Opponent[]>(() => generateOpponents(PLAYER.level));
+  const [duelState, setDuelState] = useState<DuelState>("list");
+  const [selected, setSelected] = useState<Opponent | null>(null);
+  const [playerHp, setPlayerHp] = useState(PLAYER.hp);
+  const [enemyHp, setEnemyHp] = useState(0);
+  const [log, setLog] = useState<BattleLog[]>([]);
+  const [won, setWon] = useState(false);
+  const [prize, setPrize] = useState(0);
+  const [fighting, setFighting] = useState(false);
+
+  function refreshOpponents() {
+    setOpponents(generateOpponents(PLAYER.level));
+  }
+
+  function startDuel(opp: Opponent) {
+    setSelected(opp);
+    setPlayerHp(PLAYER.hp);
+    setEnemyHp(opp.hpMax);
+    setLog([{ text: `⚔️ Дуэль началась! ${PLAYER.name} vs ${opp.name}`, type: "info" }]);
+    setDuelState("fighting");
+    setFighting(false);
+  }
+
+  function runBattle(opp: Opponent, startPlayerHp: number, startEnemyHp: number) {
+    if (fighting) return;
+    setFighting(true);
+
+    let pHp = startPlayerHp;
+    let eHp = startEnemyHp;
+    const newLog: BattleLog[] = [];
+
+    const rounds: (() => void)[] = [];
+
+    while (pHp > 0 && eHp > 0) {
+      const pStr = PLAYER.stats.strength;
+      const pAgi = PLAYER.stats.agility;
+      const pLuck = PLAYER.stats.luck;
+
+      const pDmg = Math.max(1, pStr + Math.floor(Math.random() * 20) - opp.endurance / 4);
+      const eDmg = Math.max(1, opp.strength + Math.floor(Math.random() * 15) - PLAYER.stats.endurance / 4);
+      const pCrit = Math.random() * 100 < pLuck / 2;
+      const eMiss = Math.random() * 100 < pAgi / 3;
+
+      const finalPDmg = pCrit ? Math.floor(pDmg * 1.5) : pDmg;
+      const finalEDmg = eMiss ? 0 : eDmg;
+
+      eHp = Math.max(0, eHp - finalPDmg);
+      pHp = Math.max(0, pHp - finalEDmg);
+
+      const pHpSnap = pHp;
+      const eHpSnap = eHp;
+      const pdLog: BattleLog = {
+        text: pCrit
+          ? `💥 КРИТ! Ты наносишь ${finalPDmg} урона (HP врага: ${eHpSnap})`
+          : `🗡️ Ты наносишь ${finalPDmg} урона (HP врага: ${eHpSnap})`,
+        type: "player",
+      };
+      const edLog: BattleLog = eMiss
+        ? { text: `💨 ${opp.name} промахнулся!`, type: "info" }
+        : { text: `🔴 ${opp.name} наносит ${finalEDmg} урона (HP: ${pHpSnap})`, type: "enemy" };
+
+      newLog.push(pdLog);
+      if (eHp > 0) newLog.push(edLog);
+
+      if (pHp <= 0 || eHp <= 0) break;
+    }
+
+    const playerWon = eHp <= 0 && pHp > 0;
+    const earnedCoins = playerWon ? opp.prize : 0;
+
+    newLog.push({
+      text: playerWon
+        ? `🏆 Победа! Ты получаешь 🪙 ${earnedCoins.toLocaleString()} монет (25% от казны ${opp.name})`
+        : `💀 Поражение... ${opp.name} оказался сильнее.`,
+      type: "info",
+    });
+
+    setLog([{ text: `⚔️ Раунды боя:`, type: "info" }]);
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < newLog.length) {
+        setLog(prev => [...prev, newLog[step]]);
+        step++;
+      } else {
+        clearInterval(interval);
+        setPlayerHp(pHp);
+        setEnemyHp(eHp);
+        setWon(playerWon);
+        setPrize(earnedCoins);
+        if (playerWon) {
+          setCoins(coins + earnedCoins);
+          setOpponents(prev => prev.filter(o => o.id !== opp.id));
+        }
+        setDuelState("result");
+        setFighting(false);
+      }
+    }, 120);
+  }
+
+  if (duelState === "list") {
+    return (
+      <div>
+        <div className="heroes-my-rank">
+          ⚔️ Выбери противника для дуэли. За победу — <strong>25% монет</strong> противника.
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8, marginBottom: 4 }}>
+          <button className="heroes-upgrade-btn" onClick={refreshOpponents}>🔄 Обновить список</button>
+        </div>
+        <table className="heroes-rank-table">
+          <thead>
+            <tr>
+              <th>Игрок</th><th>Ур.</th><th>🪙 Казна</th><th>Приз</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {opponents.map(opp => (
+              <tr key={opp.id}>
+                <td>
+                  <div style={{ fontWeight: "bold" }}>{opp.name}</div>
+                  <div style={{ fontSize: 11, color: "#888" }}>{opp.class}</div>
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  <span className={opp.level > PLAYER.level ? "duel-lvl-hard" : opp.level < PLAYER.level ? "duel-lvl-easy" : "duel-lvl-equal"}>
+                    {opp.level}
+                  </span>
+                </td>
+                <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>🪙 {opp.coins.toLocaleString()}</td>
+                <td style={{ textAlign: "right", whiteSpace: "nowrap", color: "#b8860b", fontWeight: "bold" }}>
+                  +{opp.prize.toLocaleString()}
+                </td>
+                <td>
+                  <button className="heroes-upgrade-btn" onClick={() => startDuel(opp)}>Вызов</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ fontSize: 11, color: "#888", marginTop: 8 }}>
+          <span className="duel-lvl-easy">■</span> слабее &nbsp;
+          <span className="duel-lvl-equal">■</span> ровня &nbsp;
+          <span className="duel-lvl-hard">■</span> сильнее
+        </div>
+      </div>
+    );
+  }
+
+  if (duelState === "fighting" && selected) {
+    const pHpPct = Math.round((playerHp / PLAYER.hpMax) * 100);
+    const eHpPct = Math.round((enemyHp / selected.hpMax) * 100);
+    return (
+      <div>
+        <div className="duel-arena">
+          <div className="duel-fighter">
+            <div className="duel-fighter-name">🧙 {PLAYER.name}</div>
+            <div className="duel-fighter-level">Ур. {PLAYER.level}</div>
+            <div className="heroes-bar-wrap" style={{ marginTop: 4 }}>
+              <div className="heroes-bar-fill heroes-bar-hp" style={{ width: `${pHpPct}%` }} />
+            </div>
+            <div style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 2 }}>{playerHp}/{PLAYER.hpMax}</div>
+          </div>
+          <div className="duel-vs">VS</div>
+          <div className="duel-fighter">
+            <div className="duel-fighter-name">⚔️ {selected.name}</div>
+            <div className="duel-fighter-level">Ур. {selected.level}</div>
+            <div className="heroes-bar-wrap" style={{ marginTop: 4 }}>
+              <div className="heroes-bar-fill heroes-bar-hp" style={{ width: `${eHpPct}%` }} />
+            </div>
+            <div style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 2 }}>{enemyHp}/{selected.hpMax}</div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", margin: "10px 0" }}>
+          <button
+            className={`heroes-upgrade-btn ${fighting ? "heroes-upgrade-btn--disabled" : ""}`}
+            style={{ fontSize: 14, padding: "6px 24px" }}
+            disabled={fighting}
+            onClick={() => runBattle(selected, playerHp, enemyHp)}
+          >
+            {fighting ? "Идёт бой..." : "▶ Начать бой"}
+          </button>
+        </div>
+
+        <div className="duel-log">
+          {log.map((entry, i) => (
+            <div key={i} className={`duel-log-line duel-log-${entry.type}`}>{entry.text}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (duelState === "result" && selected) {
+    return (
+      <div>
+        <div className={`duel-result-banner ${won ? "duel-result-win" : "duel-result-lose"}`}>
+          {won ? "🏆 ПОБЕДА!" : "💀 ПОРАЖЕНИЕ"}
+        </div>
+        {won ? (
+          <div className="heroes-my-rank" style={{ marginTop: 8, textAlign: "center" }}>
+            Ты победил <strong>{selected.name}</strong> и получил<br />
+            <span style={{ fontSize: 20, fontWeight: "bold", color: "#b8860b" }}>🪙 +{prize.toLocaleString()}</span> монет
+          </div>
+        ) : (
+          <div className="heroes-my-rank" style={{ marginTop: 8, textAlign: "center" }}>
+            <strong>{selected.name}</strong> оказался сильнее.<br />
+            <span style={{ color: "#7a0a0a" }}>Попробуй снова или выбери другого противника.</span>
+          </div>
+        )}
+        <div className="duel-log" style={{ marginTop: 10, maxHeight: 200 }}>
+          {log.map((entry, i) => (
+            <div key={i} className={`duel-log-line duel-log-${entry.type}`}>{entry.text}</div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 10, justifyContent: "center" }}>
+          <button className="heroes-upgrade-btn" onClick={() => setDuelState("list")}>← Назад к списку</button>
+          {!won && selected && (
+            <button className="heroes-upgrade-btn" onClick={() => startDuel(selected)}>🔄 Реванш</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 /* ─── Root ─── */
 export default function Index() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -427,6 +703,7 @@ export default function Index() {
     leaderboard: "Рейтинг",
     shop: "Магазин",
     achievements: "Достижения",
+    duel: "Дуэль",
   };
 
   return (
@@ -458,6 +735,7 @@ export default function Index() {
         {screen === "leaderboard" && <LeaderboardScreen />}
         {screen === "shop" && <ShopScreen />}
         {screen === "achievements" && <AchievementsScreen />}
+        {screen === "duel" && <DuelScreen coins={coins} setCoins={setCoins} />}
       </main>
 
       {/* ── Footer nav ── */}
