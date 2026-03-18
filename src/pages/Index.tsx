@@ -420,7 +420,7 @@ function LeaderboardScreen() {
 
         <div className="space-y-1">
           {LEADERBOARD.map((p, i) => {
-            if ((p as any).divider) {
+            if (p.divider) {
               return (
                 <div key={i} className="flex items-center gap-2 py-1 px-3">
                   <div className="flex-1 border-t border-dashed border-[hsl(0,0%,20%)]" />
@@ -429,7 +429,7 @@ function LeaderboardScreen() {
                 </div>
               );
             }
-            const isMe = (p as any).isMe;
+            const isMe = p.isMe;
             return (
               <div
                 key={p.rank}
@@ -448,7 +448,7 @@ function LeaderboardScreen() {
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    {(p as any).online && <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,70%,45%)] flex-shrink-0" />}
+                    {p.online && <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,70%,45%)] flex-shrink-0" />}
                     <span className={`font-display text-sm font-semibold truncate ${isMe ? "text-[hsl(45,100%,60%)]" : "text-white"}`}>{p.name}</span>
                     {isMe && <span className="text-[9px] text-[hsl(45,100%,60%)] border border-[hsl(45,100%,40%)] px-1 font-mono">ТЫ</span>}
                   </div>
@@ -595,7 +595,7 @@ function AchievementsScreen() {
                   : "bg-[hsl(0,0%,10%)] border-[hsl(0,0%,20%)]"
               }`}
                 style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-                <Icon name={a.icon as any} fallback="Star" size={16} className={a.unlocked ? "text-[hsl(45,100%,60%)]" : "text-muted-foreground"} />
+                <Icon name={a.icon} fallback="Star" size={16} className={a.unlocked ? "text-[hsl(45,100%,60%)]" : "text-muted-foreground"} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -696,7 +696,7 @@ export default function Index() {
                 }`}
               >
                 <div className={`relative transition-transform ${active ? "scale-110" : ""}`}>
-                  <Icon name={item.icon as any} fallback="Circle" size={17} />
+                  <Icon name={item.icon} fallback="Circle" size={17} />
                   {active && (
                     <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-[hsl(45,100%,60%)] rounded-full" />
                   )}
