@@ -346,3 +346,458 @@
     color: hsl(25 80% 55%);
   }
 }
+
+/* ═══════════════════════════════════════
+   HEROES CLASSIC RPG UI
+═══════════════════════════════════════ */
+
+.heroes-root {
+  min-height: 100vh;
+  background: #f5f0d8;
+  color: #2a1a00;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #c8a050;
+  border-right: 1px solid #c8a050;
+}
+
+/* ── Header ── */
+.heroes-header {
+  background: linear-gradient(180deg, #7a0a0a 0%, #5a0606 60%, #3d0303 100%);
+  color: #f5d98a;
+  border-bottom: 3px solid #c8a050;
+  padding: 6px 10px 4px;
+  text-align: center;
+}
+
+.heroes-header-title {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: #f5d98a;
+  text-shadow:
+    1px 1px 2px #000,
+    0 0 8px rgba(200, 160, 80, 0.4);
+  margin-bottom: 4px;
+}
+
+.heroes-header-wings {
+  font-size: 18px;
+  margin: 0 6px;
+}
+
+.heroes-header-text {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  letter-spacing: 8px;
+}
+
+.heroes-header-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  color: #fde89a;
+  margin-bottom: 2px;
+}
+
+.heroes-header-avatar {
+  font-weight: bold;
+  color: #fff;
+  margin-right: 4px;
+}
+
+.heroes-stat-pill {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(200, 160, 80, 0.4);
+  border-radius: 2px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: #fde89a;
+}
+
+.heroes-header-time {
+  font-size: 11px;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+/* ── Main content ── */
+.heroes-main {
+  flex: 1;
+  background: #faf5e0;
+  padding: 12px 14px;
+  border-left: 1px solid #d4a84b;
+  border-right: 1px solid #d4a84b;
+}
+
+/* ── Banner ── */
+.heroes-banner {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.heroes-banner-img {
+  max-width: 260px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid #b8860b;
+}
+
+.heroes-welcome {
+  font-size: 16px;
+  font-weight: bold;
+  color: #3d1a00;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.heroes-sub {
+  font-size: 13px;
+  color: #4a2800;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* ── Section divider ── */
+.heroes-section-divider {
+  border: none;
+  border-top: 1px solid #c8a050;
+  margin: 8px 0;
+}
+
+.heroes-section-title {
+  font-weight: bold;
+  color: #5a0606;
+  font-size: 13px;
+  margin: 8px 0 4px;
+  border-bottom: 1px solid #d4a84b;
+  padding-bottom: 3px;
+}
+
+.heroes-note {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+/* ── Menu list ── */
+.heroes-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.heroes-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px dotted #d4b86a;
+}
+
+.heroes-menu-item:last-child {
+  border-bottom: none;
+}
+
+.heroes-menu-emoji {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.heroes-menu-link {
+  color: #7a0a0a;
+  text-decoration: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.heroes-menu-link:hover {
+  text-decoration: underline;
+  color: #a01010;
+}
+
+/* ── Character table ── */
+.heroes-char-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.heroes-char-table tr {
+  border-bottom: 1px dotted #d4b86a;
+}
+
+.heroes-char-table td {
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+.heroes-td-label {
+  color: #5a3800;
+  font-weight: bold;
+  width: 120px;
+  white-space: nowrap;
+}
+
+/* ── Progress bars ── */
+.heroes-bar-wrap {
+  background: #ddd5a8;
+  border: 1px solid #b8a060;
+  height: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.heroes-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.heroes-bar-hp {
+  background: linear-gradient(90deg, #2a9a2a, #50cc50);
+}
+.heroes-bar-mana {
+  background: linear-gradient(90deg, #1a5aaa, #3a8aee);
+}
+.heroes-bar-xp {
+  background: linear-gradient(90deg, #b8860b, #f0c040);
+}
+
+/* ── Upgrade button ── */
+.heroes-upgrade-btn {
+  background: linear-gradient(180deg, #c8a050, #9a6a10);
+  color: #fff;
+  border: 1px solid #7a4a00;
+  border-radius: 2px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.heroes-upgrade-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e0b860, #b07820);
+}
+
+.heroes-upgrade-btn--disabled {
+  background: #ccc;
+  color: #888;
+  border-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* ── Quest rows ── */
+.heroes-quest-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 3px 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  border-bottom: 1px dotted #d4b86a;
+}
+
+.heroes-quest-detail {
+  background: #f0e8c0;
+  border: 1px solid #c8a050;
+  border-radius: 2px;
+  padding: 8px;
+  margin: 4px 0 6px 26px;
+  font-size: 12px;
+  color: #4a2800;
+  line-height: 1.5;
+}
+
+/* ── Diary ── */
+.heroes-diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroes-diary-entry {
+  background: #f5eec8;
+  border: 1px solid #c8a050;
+  border-radius: 2px;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #3a2000;
+}
+
+.heroes-diary-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.heroes-diary-tag {
+  color: #7a0a0a;
+  font-weight: bold;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* ── Leaderboard / Shop tables ── */
+.heroes-rank-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.heroes-rank-table th {
+  background: linear-gradient(180deg, #7a0a0a, #5a0606);
+  color: #f5d98a;
+  padding: 5px 8px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.heroes-rank-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0d0a0;
+  vertical-align: middle;
+}
+
+.heroes-rank-table tr:nth-child(even) td {
+  background: #f5eec8;
+}
+
+.heroes-rank-me td {
+  background: #fff3cc !important;
+  font-weight: bold;
+  color: #7a0a0a;
+}
+
+.heroes-rank-divider {
+  text-align: center;
+  color: #888;
+  padding: 4px !important;
+  font-size: 14px;
+  background: transparent !important;
+}
+
+.heroes-me-badge {
+  display: inline-block;
+  background: #7a0a0a;
+  color: #fde89a;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.heroes-my-rank {
+  background: #f0e8c0;
+  border: 1px solid #c8a050;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #3a2000;
+  border-radius: 2px;
+}
+
+/* ── Achievements locked ── */
+.heroes-ach-locked {
+  opacity: 0.5;
+}
+
+/* ── Footer ── */
+.heroes-footer {
+  background: linear-gradient(180deg, #5a0606 0%, #3d0303 100%);
+  border-top: 3px solid #c8a050;
+  padding: 8px 10px 6px;
+}
+
+.heroes-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.heroes-footer-link {
+  color: #f5d98a;
+  text-decoration: underline;
+  font-size: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Times New Roman", serif;
+  padding: 0;
+}
+
+.heroes-footer-link:hover {
+  color: #fff;
+}
+
+.heroes-footer-time {
+  text-align: center;
+  color: #ccc;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.heroes-footer-copy {
+  text-align: center;
+  color: #bbb;
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+/* ── Tab navigation ── */
+.heroes-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.heroes-tab-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(200, 160, 80, 0.4);
+  color: #f5d98a;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: "Times New Roman", serif;
+  transition: all 0.15s;
+}
+
+.heroes-tab-btn:hover {
+  background: rgba(200, 160, 80, 0.2);
+  border-color: #c8a050;
+}
+
+.heroes-tab-btn--active {
+  background: linear-gradient(180deg, #c8a050, #9a6a10);
+  border-color: #f5d98a;
+  color: #fff;
+  font-weight: bold;
+}

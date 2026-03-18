@@ -1,6 +1,4 @@
 import { useState } from "react";
-import type React from "react";
-import Icon from "@/components/ui/icon";
 
 type Screen = "home" | "character" | "diary" | "leaderboard" | "shop" | "achievements";
 
@@ -18,6 +16,8 @@ const PLAYER = {
   coins: 8340,
   crystals: 47,
   rank: 47,
+  attack: 9,
+  defence: 0,
   stats: {
     strength: 72,
     agility: 58,
@@ -33,10 +33,10 @@ const PLAYER = {
 };
 
 const QUESTS = [
-  { id: 1, title: "Логово кобольдов", desc: "Зачистить пещеры к северу от деревни", progress: 6, total: 10, xp: 500, gold: 120, active: true, type: "combat" },
-  { id: 2, title: "Торговец в беде", desc: "Сопроводить купца до форта Эйлон", progress: 1, total: 1, xp: 300, gold: 80, active: true, type: "story" },
-  { id: 3, title: "Сбор трав", desc: "Найти 5 лунных цветков на болоте", progress: 2, total: 5, xp: 200, gold: 50, active: true, type: "gather" },
-  { id: 4, title: "Тайна руин", desc: "Исследовать древние руины Эшара", progress: 0, total: 3, xp: 800, gold: 200, active: false, type: "explore" },
+  { id: 1, title: "Логово кобольдов", desc: "Зачистить пещеры к северу от деревни", progress: 6, total: 10, xp: 500, gold: 120, active: true, type: "combat", emoji: "⚔️" },
+  { id: 2, title: "Торговец в беде", desc: "Сопроводить купца до форта Эйлон", progress: 1, total: 1, xp: 300, gold: 80, active: true, type: "story", emoji: "📜" },
+  { id: 3, title: "Сбор трав", desc: "Найти 5 лунных цветков на болоте", progress: 2, total: 5, xp: 200, gold: 50, active: true, type: "gather", emoji: "🌿" },
+  { id: 4, title: "Тайна руин", desc: "Исследовать древние руины Эшара", progress: 0, total: 3, xp: 800, gold: 200, active: false, type: "explore", emoji: "🗺️" },
 ];
 
 const DIARY = [
@@ -72,662 +72,357 @@ const SHOP_ITEMS = [
 ];
 
 const ACHIEVEMENTS = [
-  { id: 1, title: "Первая кровь", desc: "Победить первого врага", icon: "Sword", unlocked: true, date: "День 1", points: 10 },
-  { id: 2, title: "Исследователь", desc: "Посетить 10 локаций", icon: "Map", unlocked: true, date: "День 22", points: 25 },
-  { id: 3, title: "Торговец", desc: "Совершить 20 покупок", icon: "ShoppingBag", unlocked: true, date: "День 31", points: 20 },
-  { id: 4, title: "Легенда подземелья", desc: "Пройти 5 данжей подряд", icon: "Flame", unlocked: false, date: "", points: 50 },
-  { id: 5, title: "Мастер квестов", desc: "Выполнить 50 заданий", icon: "CheckSquare", unlocked: false, date: "", points: 75 },
-  { id: 6, title: "Непобедимый", desc: "10 боёв без потери HP", icon: "Shield", unlocked: false, date: "", points: 100 },
-  { id: 7, title: "Богач", desc: "Накопить 10 000 золота", icon: "Coins", unlocked: false, date: "", points: 40 },
-  { id: 8, title: "Ветеран", desc: "Достичь 50 уровня", icon: "Star", unlocked: false, date: "", points: 200 },
+  { id: 1, title: "Первая кровь", desc: "Победить первого врага", emoji: "⚔️", unlocked: true, date: "День 1", points: 10 },
+  { id: 2, title: "Исследователь", desc: "Посетить 10 локаций", emoji: "🗺️", unlocked: true, date: "День 22", points: 25 },
+  { id: 3, title: "Торговец", desc: "Совершить 20 покупок", emoji: "🛒", unlocked: true, date: "День 31", points: 20 },
+  { id: 4, title: "Легенда подземелья", desc: "Пройти 5 данжей подряд", emoji: "🏰", unlocked: false, date: "", points: 50 },
+  { id: 5, title: "Мастер квестов", desc: "Выполнить 50 заданий", emoji: "📋", unlocked: false, date: "", points: 75 },
+  { id: 6, title: "Непобедимый", desc: "10 боёв без потери HP", emoji: "🛡️", unlocked: false, date: "", points: 100 },
+  { id: 7, title: "Богач", desc: "Накопить 10 000 золота", emoji: "💰", unlocked: false, date: "", points: 40 },
+  { id: 8, title: "Ветеран", desc: "Достичь 50 уровня", emoji: "⭐", unlocked: false, date: "", points: 200 },
 ];
 
 const RARITY_COLOR: Record<string, string> = {
-  common: "text-[hsl(0,0%,65%)]",
-  uncommon: "text-[hsl(145,70%,45%)]",
-  rare: "text-[hsl(195,100%,50%)]",
-  epic: "text-[hsl(270,80%,70%)]",
-  legendary: "text-[hsl(45,100%,60%)]",
+  common: "#888",
+  uncommon: "#4caf50",
+  rare: "#2196f3",
+  epic: "#9c27b0",
+  legendary: "#ff9800",
 };
 
-const RARITY_BORDER: Record<string, string> = {
-  common: "border-[hsl(0,0%,25%)]",
-  uncommon: "border-[hsl(145,70%,30%)]",
-  rare: "border-[hsl(195,100%,30%)]",
-  epic: "border-[hsl(270,80%,40%)]",
-  legendary: "border-[hsl(45,100%,40%)]",
+const MAIN_MENU = [
+  { id: "diary" as Screen, label: "Дневник", emoji: "⭐" },
+  { id: "diary" as Screen, label: "Задания", emoji: "📜" },
+  { id: "home" as Screen, label: "Дуэль", emoji: "⚔️" },
+  { id: "home" as Screen, label: "Поселок", emoji: "🏘️" },
+  { id: "home" as Screen, label: "Поход", emoji: "🌲" },
+  { id: "home" as Screen, label: "Подземелье", emoji: "⛏️" },
+  { id: "home" as Screen, label: "Плавание", emoji: "⛵" },
+  { id: "home" as Screen, label: "Дракон", emoji: "🐉" },
+  { id: "home" as Screen, label: "Орки", emoji: "👹" },
+  { id: "leaderboard" as Screen, label: "Орден", emoji: "🏰" },
+  { id: "home" as Screen, label: "Дружина", emoji: "🤝" },
+  { id: "home" as Screen, label: "Зверинец", emoji: "🦁" },
+  { id: "leaderboard" as Screen, label: "Лучшие", emoji: "🏆" },
+  { id: "home" as Screen, label: "Пригласить", emoji: "✉️" },
+];
+
+const BOTTOM_MENU = [
+  { id: "home" as Screen, label: "Главная", emoji: "🌲" },
+  { id: "character" as Screen, label: "Герой", emoji: "🧙" },
+  { id: "home" as Screen, label: "Чат (377)", emoji: "💬" },
+  { id: "home" as Screen, label: "Почта", emoji: "📬" },
+  { id: "shop" as Screen, label: "Золото", emoji: "🪙" },
+];
+
+const STAT_META: Record<string, { label: string; emoji: string }> = {
+  strength:  { label: "Сила",        emoji: "⚔️" },
+  agility:   { label: "Ловкость",    emoji: "🏹" },
+  intellect: { label: "Интеллект",   emoji: "📚" },
+  endurance: { label: "Выносливость",emoji: "🛡️" },
+  luck:      { label: "Удача",       emoji: "🍀" },
 };
 
-const QUEST_TYPE_COLOR: Record<string, string> = {
-  combat: "text-[hsl(0,85%,65%)]",
-  story: "text-[hsl(195,100%,50%)]",
-  gather: "text-[hsl(145,70%,45%)]",
-  explore: "text-[hsl(270,80%,70%)]",
-};
+function upgradeCost(value: number): number {
+  return Math.floor(100 * Math.pow(1.15, value - 30));
+}
 
-function StatBar({ label, value, max = 100, color = "gold" }: { label: string; value: number; max?: number; color?: string }) {
-  const pct = Math.round((value / max) * 100);
+/* ─── HomeScreen ─── */
+function HomeScreen() {
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-muted-foreground font-mono uppercase tracking-widest">{label}</span>
-        <span className="text-xs font-mono text-foreground">{value}</span>
+    <div>
+      <div className="heroes-banner">
+        <img src="https://cdn.poehali.dev/files/0eb5b8bd-83b4-4221-a23c-5b861ca90e37.jpg" alt="banner" className="heroes-banner-img" />
       </div>
-      <div className="bg-[hsl(0,0%,12%)] h-1.5 relative overflow-hidden">
-        <div
-          className={`h-full transition-all duration-500 ${
-            color === "cyan"
-              ? "bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(195,100%,70%)]"
-              : color === "green"
-              ? "bg-gradient-to-r from-[hsl(145,70%,45%)] to-[hsl(145,70%,65%)]"
-              : "bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)]"
-          }`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <p className="heroes-welcome">Добро пожаловать!</p>
+      <p className="heroes-sub">
+        Армия из <strong>2 447 370</strong> героев приветствует тебя, {PLAYER.name}! Поблизости <strong>{PLAYER.rank}</strong>
+      </p>
+
+      <div className="heroes-section-divider" />
+
+      <ul className="heroes-menu-list">
+        {MAIN_MENU.map((item, i) => (
+          <li key={i} className="heroes-menu-item">
+            <span className="heroes-menu-emoji">{item.emoji}</span>
+            <span className="heroes-menu-link">{item.label}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="heroes-section-divider" />
+
+      <ul className="heroes-menu-list heroes-bottom-list">
+        {BOTTOM_MENU.map((item, i) => (
+          <li key={i} className="heroes-menu-item">
+            <span className="heroes-menu-emoji">{item.emoji}</span>
+            <span className="heroes-menu-link">{item.label}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function HomeScreen() {
-  const expPct = Math.round((PLAYER.exp / PLAYER.expMax) * 100);
-  const hpPct = Math.round((PLAYER.hp / PLAYER.hpMax) * 100);
-  const manaPct = Math.round((PLAYER.mana / PLAYER.manaMax) * 100);
+/* ─── CharacterScreen ─── */
+function CharacterScreen({ coins, setCoins }: { coins: number; setCoins: (v: number) => void }) {
+  const [stats, setStats] = useState({ ...PLAYER.stats });
+
+  function upgrade(key: string) {
+    const val = stats[key as keyof typeof stats];
+    const cost = upgradeCost(val);
+    if (coins < cost) return;
+    setCoins(coins - cost);
+    setStats(prev => ({ ...prev, [key]: val + 1 }));
+  }
 
   return (
-    <div className="animate-slide-up space-y-4">
-      <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-5 relative overflow-hidden"
-        style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-        <div className="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none"
-          style={{ background: "radial-gradient(circle, hsl(45,100%,60%) 0%, transparent 70%)" }} />
-        <div className="flex items-start gap-4">
-          <div className="relative flex-shrink-0">
-            <div className="w-16 h-16 bg-[hsl(0,0%,12%)] border border-[hsl(45,100%,40%,0.4)] flex items-center justify-center text-2xl"
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-              ⚔️
-            </div>
-            <div className="absolute -bottom-1 -right-1 bg-[hsl(45,100%,60%)] text-[hsl(0,0%,6%)] text-[10px] font-bold px-1.5 py-0.5 font-display"
-              style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-              {PLAYER.level}
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45 flex-shrink-0" />
-              <h2 className="font-display text-xl font-bold text-white tracking-wide">{PLAYER.name}</h2>
-            </div>
-            <p className="text-xs text-[hsl(45,100%,60%)] font-mono uppercase tracking-widest mb-3">{PLAYER.class}</p>
-            <div className="space-y-1.5">
-              <div>
-                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-mono">
-                  <span>HP</span><span>{PLAYER.hp}/{PLAYER.hpMax}</span>
-                </div>
-                <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[hsl(145,70%,45%)] to-[hsl(145,70%,65%)] transition-all" style={{ width: `${hpPct}%` }} />
-                </div>
+    <div>
+      <table className="heroes-char-table">
+        <tbody>
+          <tr><td className="heroes-td-label">Имя</td><td>{PLAYER.name}</td></tr>
+          <tr><td className="heroes-td-label">Класс</td><td>{PLAYER.class}</td></tr>
+          <tr><td className="heroes-td-label">Уровень</td><td>{PLAYER.level}</td></tr>
+          <tr>
+            <td className="heroes-td-label">Опыт</td>
+            <td>
+              <div style={{ marginBottom: 3 }}>{PLAYER.exp} / {PLAYER.expMax}</div>
+              <div className="heroes-bar-wrap">
+                <div className="heroes-bar-fill heroes-bar-xp" style={{ width: `${Math.round((PLAYER.exp / PLAYER.expMax) * 100)}%` }} />
               </div>
-              <div>
-                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-mono">
-                  <span>МАНА</span><span>{PLAYER.mana}/{PLAYER.manaMax}</span>
-                </div>
-                <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(195,100%,70%)] transition-all" style={{ width: `${manaPct}%` }} />
-                </div>
+            </td>
+          </tr>
+          <tr>
+            <td className="heroes-td-label">HP</td>
+            <td>
+              <div style={{ marginBottom: 3 }}>{PLAYER.hp} / {PLAYER.hpMax}</div>
+              <div className="heroes-bar-wrap">
+                <div className="heroes-bar-fill heroes-bar-hp" style={{ width: `${Math.round((PLAYER.hp / PLAYER.hpMax) * 100)}%` }} />
               </div>
-              <div>
-                <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-mono">
-                  <span>ОПЫТ</span><span>{PLAYER.exp}/{PLAYER.expMax}</span>
-                </div>
-                <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)] transition-all" style={{ width: `${expPct}%` }} />
-                </div>
+            </td>
+          </tr>
+          <tr>
+            <td className="heroes-td-label">Мана</td>
+            <td>
+              <div style={{ marginBottom: 3 }}>{PLAYER.mana} / {PLAYER.manaMax}</div>
+              <div className="heroes-bar-wrap">
+                <div className="heroes-bar-fill heroes-bar-mana" style={{ width: `${Math.round((PLAYER.mana / PLAYER.manaMax) * 100)}%` }} />
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            </td>
+          </tr>
+          <tr><td className="heroes-td-label">Атака</td><td>{PLAYER.attack}</td></tr>
+          <tr><td className="heroes-td-label">Защита</td><td>{PLAYER.defence}</td></tr>
+          <tr><td className="heroes-td-label">Оружие</td><td>{PLAYER.equipped.weapon}</td></tr>
+          <tr><td className="heroes-td-label">Броня</td><td>{PLAYER.equipped.armor}</td></tr>
+          <tr><td className="heroes-td-label">Амулет</td><td>{PLAYER.equipped.amulet}</td></tr>
+        </tbody>
+      </table>
 
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { label: "Рейтинг", value: `#${PLAYER.rank}`, color: "text-[hsl(45,100%,60%)]" },
-          { label: "Золото", value: `◆ ${PLAYER.gold}`, color: "text-[hsl(45,100%,60%)]" },
-          { label: "Достиж.", value: String(ACHIEVEMENTS.filter(a => a.unlocked).length), color: "text-[hsl(195,100%,50%)]" },
-        ].map(s => (
-          <div key={s.label} className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3 text-center"
-            style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-            <div className={`text-xl font-display font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5 font-mono">{s.label}</div>
+      <div className="heroes-section-title" style={{ marginTop: 14 }}>⚡ Характеристики</div>
+      <div className="heroes-note">Цена растёт с каждым уровнем · Баланс: 🪙 {coins.toLocaleString()}</div>
+
+      <table className="heroes-char-table">
+        <tbody>
+          {Object.entries(stats).map(([key, val]) => {
+            const meta = STAT_META[key];
+            const cost = upgradeCost(val);
+            const canAfford = coins >= cost;
+            return (
+              <tr key={key}>
+                <td className="heroes-td-label">{meta.emoji} {meta.label}</td>
+                <td style={{ width: 40, textAlign: "center", fontWeight: "bold" }}>{val}</td>
+                <td>
+                  <button
+                    className={`heroes-upgrade-btn ${canAfford ? "" : "heroes-upgrade-btn--disabled"}`}
+                    onClick={() => upgrade(key)}
+                    disabled={!canAfford}
+                  >
+                    +1 · 🪙{cost.toLocaleString()}
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ─── DiaryScreen ─── */
+function DiaryScreen() {
+  const [openId, setOpenId] = useState<number | null>(null);
+
+  return (
+    <div>
+      <div className="heroes-section-title">📜 Задания</div>
+      <ul className="heroes-menu-list" style={{ marginBottom: 12 }}>
+        {QUESTS.map(q => (
+          <li key={q.id}>
+            <button className="heroes-quest-row" onClick={() => setOpenId(openId === q.id ? null : q.id)}>
+              <span className="heroes-menu-emoji">{q.emoji}</span>
+              <span className="heroes-menu-link" style={{ flex: 1, textAlign: "left" }}>{q.title}</span>
+              <span style={{ fontSize: 11, color: q.active ? "#4a9b4a" : "#999" }}>{q.active ? "●" : "○"}</span>
+            </button>
+            {openId === q.id && (
+              <div className="heroes-quest-detail">
+                <p style={{ marginBottom: 4 }}>{q.desc}</p>
+                <div className="heroes-bar-wrap" style={{ marginBottom: 4 }}>
+                  <div className="heroes-bar-fill heroes-bar-xp" style={{ width: `${(q.progress / q.total) * 100}%` }} />
+                </div>
+                <span style={{ color: "#888", fontSize: 11 }}>
+                  {q.progress}/{q.total} · Награда: +{q.xp} XP · ◆{q.gold}
+                </span>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div className="heroes-section-divider" />
+      <div className="heroes-section-title">📖 Записи дневника</div>
+      <div className="heroes-diary-list">
+        {DIARY.map(e => (
+          <div key={e.id} className="heroes-diary-entry">
+            <div className="heroes-diary-meta">
+              <span>{e.date}</span>
+              <span className="heroes-diary-tag">{e.tag}</span>
+            </div>
+            <p>{e.text}</p>
           </div>
         ))}
       </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 bg-[hsl(195,100%,50%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Активные квесты</h3>
-        </div>
-        <div className="space-y-2">
-          {QUESTS.filter(q => q.active).slice(0, 2).map(q => (
-            <div key={q.id} className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3"
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-              <div className="flex justify-between items-start mb-1.5">
-                <span className="font-display text-sm font-semibold text-white">{q.title}</span>
-                <span className={`text-[10px] uppercase tracking-widest font-mono ${QUEST_TYPE_COLOR[q.type]}`}>{q.type}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-[hsl(0,0%,12%)] h-1.5 flex-1 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)]" style={{ width: `${(q.progress / q.total) * 100}%` }} />
-                </div>
-                <span className="text-[10px] font-mono text-muted-foreground">{q.progress}/{q.total}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border border-[hsl(45,100%,60%,0.15)] bg-[hsl(45,100%,60%,0.04)] p-3"
-        style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-        <div className="flex gap-2 items-start">
-          <span className="text-[hsl(45,100%,60%)] text-sm mt-0.5">◆</span>
-          <p className="text-xs text-muted-foreground font-mono leading-relaxed">
-            <span className="text-[hsl(45,100%,60%)] font-semibold">Совет дня:</span>{" "}
-            Посети руины Эшара — там скрыт редкий эпический лут.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
 
-type StatKey = "strength" | "agility" | "intellect" | "endurance" | "luck";
-
-const STAT_META: Record<StatKey, { label: string; color: string; emoji: string }> = {
-  strength:   { label: "Сила",        color: "gold",  emoji: "⚔️" },
-  agility:    { label: "Ловкость",    color: "gold",  emoji: "🏃" },
-  intellect:  { label: "Интеллект",   color: "cyan",  emoji: "🔮" },
-  endurance:  { label: "Выносливость",color: "green", emoji: "🛡️" },
-  luck:       { label: "Удача",       color: "cyan",  emoji: "🍀" },
-};
-
-function upgradeCost(value: number) {
-  return Math.floor(100 * Math.pow(1.18, value - 40));
-}
-
-function CharacterScreen({ coins, setCoins }: { coins: number; setCoins: React.Dispatch<React.SetStateAction<number>> }) {
-  const [stats, setStats] = useState({ ...PLAYER.stats });
-  const [flash, setFlash] = useState<StatKey | null>(null);
-  const [noMoney, setNoMoney] = useState<StatKey | null>(null);
-
-  function upgrade(key: StatKey) {
-    const cost = upgradeCost(stats[key]);
-    if (coins < cost) {
-      setNoMoney(key);
-      setTimeout(() => setNoMoney(null), 800);
-      return;
-    }
-    setCoins(c => c - cost);
-    setStats(s => ({ ...s, [key]: s[key] + 1 }));
-    setFlash(key);
-    setTimeout(() => setFlash(null), 600);
-  }
-
-  return (
-    <div className="animate-slide-up space-y-4">
-      <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4"
-        style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-[hsl(0,0%,12%)] border border-[hsl(45,100%,40%)] flex items-center justify-center text-4xl"
-            style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-            ⚔️
-          </div>
-          <div>
-            <h2 className="font-display text-2xl font-bold text-white tracking-wide">{PLAYER.name}</h2>
-            <p className="text-[hsl(45,100%,60%)] text-xs font-mono uppercase tracking-widest">{PLAYER.class}</p>
-            <div className="flex items-center gap-3 mt-2">
-              <div className="bg-[hsl(45,100%,60%,0.1)] border border-[hsl(45,100%,60%,0.3)] px-3 py-1"
-                style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
-                <span className="text-[hsl(45,100%,60%)] font-display text-sm font-bold">УР. {PLAYER.level}</span>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono">Ранг #{PLAYER.rank}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Balance */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-base">🪙</span>
-          <span className="font-display text-sm font-bold text-white">{coins.toLocaleString()}</span>
-          <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">монет</span>
-        </div>
-        <span className="text-[10px] text-muted-foreground font-mono">Цена растёт с каждым уровнем</span>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Характеристики</h3>
-        </div>
-        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4 space-y-4"
-          style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-          {(Object.keys(stats) as StatKey[]).map(key => {
-            const meta = STAT_META[key];
-            const val = stats[key];
-            const cost = upgradeCost(val);
-            const canAfford = coins >= cost;
-            const isFlash = flash === key;
-            const isNoMoney = noMoney === key;
-            return (
-              <div key={key}>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-sm leading-none">{meta.emoji}</span>
-                  <span className="text-xs text-muted-foreground font-mono uppercase tracking-widest flex-1">{meta.label}</span>
-                  <span className={`font-display text-base font-bold transition-all duration-300 ${isFlash ? "text-[hsl(145,70%,55%)] scale-110" : "text-white"}`}>
-                    {val}
-                  </span>
-                  <button
-                    onClick={() => upgrade(key)}
-                    className={`flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${
-                      isNoMoney
-                        ? "bg-[hsl(0,85%,30%)] border border-[hsl(0,85%,45%)] text-[hsl(0,85%,70%)]"
-                        : canAfford
-                        ? "bg-[hsl(45,100%,60%)] text-[hsl(0,0%,6%)] hover:bg-[hsl(45,100%,70%)] hover:-translate-y-px active:scale-95"
-                        : "bg-[hsl(0,0%,12%)] border border-[hsl(0,0%,20%)] text-muted-foreground cursor-not-allowed"
-                    }`}
-                    style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}
-                  >
-                    {isNoMoney ? (
-                      <span>Мало!</span>
-                    ) : (
-                      <>
-                        <span>🪙</span>
-                        <span>{cost.toLocaleString()}</span>
-                        <span className="text-[9px] opacity-70">+1</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden relative">
-                  <div
-                    className={`h-full transition-all duration-500 ${
-                      meta.color === "cyan"
-                        ? "bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(195,100%,70%)]"
-                        : meta.color === "green"
-                        ? "bg-gradient-to-r from-[hsl(145,70%,45%)] to-[hsl(145,70%,65%)]"
-                        : "bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)]"
-                    }`}
-                    style={{ width: `${Math.min(val, 100)}%` }}
-                  />
-                  {isFlash && (
-                    <div className="absolute inset-0 bg-[hsl(145,70%,55%,0.4)] animate-pulse" />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Снаряжение</h3>
-        </div>
-        <div className="space-y-2">
-          {Object.entries(PLAYER.equipped).map(([slot, item]) => {
-            const icons: Record<string, string> = { weapon: "Sword", armor: "Shield", amulet: "Gem" };
-            const labels: Record<string, string> = { weapon: "Оружие", armor: "Броня", amulet: "Амулет" };
-            return (
-              <div key={slot} className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3 flex items-center gap-3"
-                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-                <div className="w-8 h-8 bg-[hsl(0,0%,12%)] flex items-center justify-center border border-[hsl(0,0%,20%)]"
-                  style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-                  <Icon name={icons[slot]} fallback="Package" size={14} className="text-[hsl(45,100%,60%)]" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">{labels[slot]}</div>
-                  <div className="text-sm font-display font-semibold text-white">{item}</div>
-                </div>
-                <div className="w-2 h-2 rounded-full bg-[hsl(145,70%,45%)]" style={{ animation: "pulse 3s ease-in-out infinite" }} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 bg-[hsl(195,100%,50%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Жизненные показатели</h3>
-        </div>
-        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4 space-y-3"
-          style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-          <StatBar label={`HP (${PLAYER.hp}/${PLAYER.hpMax})`} value={PLAYER.hp} max={PLAYER.hpMax} color="green" />
-          <StatBar label={`Мана (${PLAYER.mana}/${PLAYER.manaMax})`} value={PLAYER.mana} max={PLAYER.manaMax} color="cyan" />
-          <StatBar label={`Опыт (${PLAYER.exp}/${PLAYER.expMax})`} value={PLAYER.exp} max={PLAYER.expMax} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DiaryScreen() {
-  const [activeQuest, setActiveQuest] = useState<number | null>(null);
-
-  return (
-    <div className="animate-slide-up space-y-4">
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Задания</h3>
-          <div className="ml-auto bg-[hsl(45,100%,60%,0.1)] border border-[hsl(45,100%,60%,0.3)] px-2 py-0.5"
-            style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-            <span className="text-[hsl(45,100%,60%)] text-[10px] font-mono">{QUESTS.filter(q => q.active).length} АКТИВНО</span>
-          </div>
-        </div>
-        <div className="space-y-2">
-          {QUESTS.map(q => (
-            <div
-              key={q.id}
-              className={`bg-[hsl(0,0%,9%)] border p-3 cursor-pointer transition-all duration-200 ${
-                activeQuest === q.id ? "border-[hsl(45,100%,40%)]" : "border-[hsl(0,0%,16%)]"
-              }`}
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
-              onClick={() => setActiveQuest(activeQuest === q.id ? null : q.id)}
-            >
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${q.active ? "bg-[hsl(145,70%,45%)]" : "bg-[hsl(0,0%,30%)]"}`} />
-                <span className="font-display font-semibold text-sm text-white flex-1">{q.title}</span>
-                <span className={`text-[10px] uppercase font-mono tracking-widest ${QUEST_TYPE_COLOR[q.type]}`}>{q.type}</span>
-                <Icon name={activeQuest === q.id ? "ChevronUp" : "ChevronDown"} size={14} className="text-muted-foreground" />
-              </div>
-
-              {activeQuest === q.id && (
-                <div className="mt-3 pt-3 border-t border-[hsl(0,0%,16%)] space-y-2">
-                  <p className="text-xs text-muted-foreground font-mono leading-relaxed">{q.desc}</p>
-                  <div>
-                    <div className="flex justify-between text-[10px] text-muted-foreground mb-1 font-mono">
-                      <span>Прогресс</span><span>{q.progress}/{q.total}</span>
-                    </div>
-                    <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)]"
-                        style={{ width: `${(q.progress / q.total) * 100}%` }} />
-                    </div>
-                  </div>
-                  <div className="flex gap-3 pt-1">
-                    <span className="text-[10px] text-muted-foreground font-mono">НАГРАДА:</span>
-                    <span className="text-[10px] text-[hsl(45,100%,60%)] font-mono">+{q.xp} XP</span>
-                    <span className="text-[10px] text-[hsl(45,80%,50%)] font-mono">◆{q.gold}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-[hsl(195,100%,50%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Записи дневника</h3>
-        </div>
-        <div className="space-y-2">
-          {DIARY.map(entry => (
-            <div key={entry.id} className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3"
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[10px] font-mono text-muted-foreground">{entry.date}</span>
-                <span className="text-[10px] font-mono text-[hsl(195,100%,50%)] uppercase tracking-widest">{entry.tag}</span>
-              </div>
-              <p className="text-xs text-foreground font-mono leading-relaxed">{entry.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/* ─── LeaderboardScreen ─── */
 function LeaderboardScreen() {
   return (
-    <div className="animate-slide-up space-y-4">
-      <div className="bg-[hsl(0,0%,9%)] border border-[hsl(45,100%,40%)] p-4 text-center"
-        style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-        <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mb-1">Твоя позиция</div>
-        <div className="text-4xl font-display font-bold text-[hsl(45,100%,60%)]">#{PLAYER.rank}</div>
-        <div className="text-xs text-muted-foreground font-mono mt-1">из 12 480 игроков</div>
+    <div>
+      <div className="heroes-my-rank">
+        Твоя позиция: <strong>#{PLAYER.rank}</strong> из 12 480 игроков
       </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Рейтинг</h3>
-        </div>
-
-        <div className="grid grid-cols-[32px_1fr_auto_auto] gap-2 px-3 mb-2">
-          {["#", "Игрок", "Ур.", "Очки"].map(h => (
-            <span key={h} className="text-[10px] text-muted-foreground font-mono uppercase">{h}</span>
-          ))}
-        </div>
-
-        <div className="space-y-1">
+      <div className="heroes-section-title" style={{ marginTop: 10 }}>🏆 Рейтинг</div>
+      <table className="heroes-rank-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Игрок</th><th>Ур.</th><th>Очки</th>
+          </tr>
+        </thead>
+        <tbody>
           {LEADERBOARD.map((p, i) => {
             if (p.divider) {
-              return (
-                <div key={i} className="flex items-center gap-2 py-1 px-3">
-                  <div className="flex-1 border-t border-dashed border-[hsl(0,0%,20%)]" />
-                  <span className="text-[10px] text-muted-foreground font-mono">···</span>
-                  <div className="flex-1 border-t border-dashed border-[hsl(0,0%,20%)]" />
-                </div>
-              );
+              return <tr key={i}><td colSpan={4} className="heroes-rank-divider">· · ·</td></tr>;
             }
-            const isMe = p.isMe;
             return (
-              <div
-                key={p.rank}
-                className={`bg-[hsl(0,0%,9%)] border p-3 grid grid-cols-[32px_1fr_auto_auto] gap-2 items-center ${
-                  isMe ? "border-[hsl(45,100%,40%)] bg-[hsl(45,100%,60%,0.05)]" : "border-[hsl(0,0%,16%)]"
-                }`}
-                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
-              >
-                <span className={`font-display text-sm font-bold ${
-                  p.rank === 1 ? "text-[hsl(45,100%,60%)]" :
-                  p.rank === 2 ? "text-[hsl(0,0%,75%)]" :
-                  p.rank === 3 ? "text-[hsl(25,80%,55%)]" :
-                  "text-muted-foreground"
-                }`}>
+              <tr key={p.rank} className={p.isMe ? "heroes-rank-me" : ""}>
+                <td style={{ textAlign: "center" }}>
                   {p.rank <= 3 ? ["🥇","🥈","🥉"][p.rank - 1] : p.rank}
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    {p.online && <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,70%,45%)] flex-shrink-0" />}
-                    <span className={`font-display text-sm font-semibold truncate ${isMe ? "text-[hsl(45,100%,60%)]" : "text-white"}`}>{p.name}</span>
-                    {isMe && <span className="text-[9px] text-[hsl(45,100%,60%)] border border-[hsl(45,100%,40%)] px-1 font-mono">ТЫ</span>}
-                  </div>
-                  {p.class && <div className="text-[10px] text-muted-foreground font-mono truncate">{p.class}</div>}
-                </div>
-                <span className="text-xs font-mono text-[hsl(195,100%,50%)] text-right">{p.level || ""}</span>
-                <span className="text-xs font-mono text-white text-right">{p.score ? p.score.toLocaleString() : ""}</span>
-              </div>
+                </td>
+                <td>
+                  {p.online && <span style={{ color: "#4a9b4a", marginRight: 4 }}>●</span>}
+                  {p.name}
+                  {p.isMe && <span className="heroes-me-badge">ТЫ</span>}
+                  {p.class ? <span style={{ color: "#888", fontSize: 11 }}> · {p.class}</span> : null}
+                </td>
+                <td style={{ textAlign: "center" }}>{p.level || ""}</td>
+                <td style={{ textAlign: "right" }}>{p.score ? p.score.toLocaleString() : ""}</td>
+              </tr>
             );
           })}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }
 
+/* ─── ShopScreen ─── */
 function ShopScreen() {
   const [gold, setGold] = useState(PLAYER.gold);
   const [items, setItems] = useState(SHOP_ITEMS);
-  const [bought, setBought] = useState<number | null>(null);
 
-  function buy(id: number, price: number) {
-    if (gold < price) return;
-    setGold(g => g - price);
+  function buy(id: number) {
+    const item = items.find(i => i.id === id);
+    if (!item || item.owned || gold < item.price) return;
+    setGold(g => g - item.price);
     setItems(prev => prev.map(i => i.id === id ? { ...i, owned: true } : i));
-    setBought(id);
-    setTimeout(() => setBought(null), 1500);
   }
 
   return (
-    <div className="animate-slide-up space-y-4">
-      <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3 flex items-center justify-between"
-        style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-        <span className="text-xs text-muted-foreground font-mono uppercase tracking-widest">Баланс</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[hsl(45,100%,60%)] text-lg">◆</span>
-          <span className="font-display text-xl font-bold text-[hsl(45,100%,60%)]">{gold.toLocaleString()}</span>
-        </div>
+    <div>
+      <div className="heroes-my-rank">
+        Ваше золото: <strong>◆ {gold.toLocaleString()}</strong>
       </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Товары</h3>
-        </div>
-
-        <div className="space-y-2">
+      <table className="heroes-rank-table" style={{ marginTop: 10 }}>
+        <thead>
+          <tr><th>Предмет</th><th>Бонус</th><th>Цена</th><th></th></tr>
+        </thead>
+        <tbody>
           {items.map(item => (
-            <div key={item.id} className={`bg-[hsl(0,0%,9%)] border p-3 transition-all ${RARITY_BORDER[item.rarity]}`}
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 flex items-center justify-center border bg-[hsl(0,0%,10%)] text-lg ${RARITY_BORDER[item.rarity]}`}
-                  style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-                  {item.type === "weapon" ? "⚔️" : item.type === "armor" ? "🛡️" : item.type === "accessory" ? "💎" : "⚗️"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-display text-sm font-semibold text-white">{item.name}</span>
-                    <span className={`text-[10px] font-mono uppercase ${RARITY_COLOR[item.rarity]}`}>{item.rarity}</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-mono">{item.bonus}</span>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  {item.owned ? (
-                    <div className="px-3 py-1.5 bg-[hsl(0,0%,14%)] text-muted-foreground text-[10px] font-mono uppercase"
-                      style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-                      Куплено
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => buy(item.id, item.price)}
-                      disabled={gold < item.price}
-                      className={`px-3 py-1.5 font-display font-semibold text-[11px] flex items-center gap-1 uppercase tracking-wider transition-all ${
-                        gold < item.price
-                          ? "bg-[hsl(0,0%,14%)] text-muted-foreground cursor-not-allowed"
-                          : "bg-[hsl(45,100%,60%)] text-[hsl(0,0%,6%)] hover:bg-[hsl(45,100%,70%)] hover:-translate-y-px"
-                      }`}
-                      style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}
-                    >
-                      ◆ {item.price}
-                    </button>
-                  )}
-                </div>
-              </div>
-              {bought === item.id && (
-                <div className="mt-2 text-[10px] text-[hsl(145,70%,45%)] font-mono animate-slide-up">✓ Куплено!</div>
-              )}
-            </div>
+            <tr key={item.id}>
+              <td style={{ color: RARITY_COLOR[item.rarity] }}>{item.name}</td>
+              <td style={{ fontSize: 11, color: "#555" }}>{item.bonus}</td>
+              <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>◆{item.price}</td>
+              <td>
+                {item.owned ? (
+                  <span style={{ color: "#4a9b4a", fontSize: 11 }}>✓ Куплено</span>
+                ) : (
+                  <button
+                    className={`heroes-upgrade-btn ${gold < item.price ? "heroes-upgrade-btn--disabled" : ""}`}
+                    onClick={() => buy(item.id)}
+                    disabled={gold < item.price}
+                  >
+                    Купить
+                  </button>
+                )}
+              </td>
+            </tr>
           ))}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }
 
+/* ─── AchievementsScreen ─── */
 function AchievementsScreen() {
   const unlocked = ACHIEVEMENTS.filter(a => a.unlocked).length;
   const totalPoints = ACHIEVEMENTS.filter(a => a.unlocked).reduce((s, a) => s + a.points, 0);
 
   return (
-    <div className="animate-slide-up space-y-4">
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3 text-center"
-          style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-          <div className="text-2xl font-display font-bold text-[hsl(45,100%,60%)]">{unlocked}/{ACHIEVEMENTS.length}</div>
-          <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">Разблокировано</div>
-        </div>
-        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3 text-center"
-          style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-          <div className="text-2xl font-display font-bold text-[hsl(195,100%,50%)]">{totalPoints}</div>
-          <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">Очки</div>
-        </div>
+    <div>
+      <div className="heroes-my-rank">
+        Разблокировано: <strong>{unlocked}/{ACHIEVEMENTS.length}</strong> · Очки: <strong>{totalPoints}</strong>
       </div>
-
-      <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-3"
-        style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>
-        <div className="flex justify-between text-[10px] text-muted-foreground font-mono mb-1.5">
-          <span>ПРОГРЕСС</span>
-          <span>{Math.round((unlocked / ACHIEVEMENTS.length) * 100)}%</span>
-        </div>
-        <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)] transition-all"
-            style={{ width: `${(unlocked / ACHIEVEMENTS.length) * 100}%` }} />
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-          <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Достижения</h3>
-        </div>
-        <div className="space-y-2">
-          {ACHIEVEMENTS.map(a => (
-            <div
-              key={a.id}
-              className={`bg-[hsl(0,0%,9%)] border p-3 flex items-center gap-3 transition-all ${
-                a.unlocked ? "border-[hsl(45,100%,40%,0.5)]" : "border-[hsl(0,0%,16%)] opacity-50"
-              }`}
-              style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
-            >
-              <div className={`w-10 h-10 flex items-center justify-center flex-shrink-0 border ${
-                a.unlocked
-                  ? "bg-[hsl(45,100%,60%,0.1)] border-[hsl(45,100%,40%)]"
-                  : "bg-[hsl(0,0%,10%)] border-[hsl(0,0%,20%)]"
-              }`}
-                style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}>
-                <Icon name={a.icon} fallback="Star" size={16} className={a.unlocked ? "text-[hsl(45,100%,60%)]" : "text-muted-foreground"} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`font-display text-sm font-semibold ${a.unlocked ? "text-white" : "text-muted-foreground"}`}>{a.title}</span>
-                  {a.unlocked && <div className="w-1.5 h-1.5 bg-[hsl(145,70%,45%)] rounded-full flex-shrink-0" />}
-                </div>
-                <p className="text-[10px] text-muted-foreground font-mono leading-relaxed">{a.desc}</p>
-                {a.unlocked && a.date && (
-                  <p className="text-[9px] text-[hsl(45,100%,60%,0.6)] font-mono mt-0.5">{a.date}</p>
-                )}
-              </div>
-              <div className="text-right flex-shrink-0">
-                <div className={`text-sm font-display font-bold ${a.unlocked ? "text-[hsl(45,100%,60%)]" : "text-muted-foreground"}`}>+{a.points}</div>
-                <div className="text-[9px] text-muted-foreground font-mono">очков</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ul className="heroes-menu-list" style={{ marginTop: 10 }}>
+        {ACHIEVEMENTS.map(a => (
+          <li key={a.id} className={`heroes-menu-item ${!a.unlocked ? "heroes-ach-locked" : ""}`}>
+            <span className="heroes-menu-emoji">{a.emoji}</span>
+            <span style={{ flex: 1 }}>
+              <span className="heroes-menu-link" style={{ opacity: a.unlocked ? 1 : 0.5 }}>{a.title}</span>
+              <span style={{ color: "#888", fontSize: 11, display: "block" }}>{a.desc}</span>
+              {a.unlocked && a.date && <span style={{ color: "#b8860b", fontSize: 10 }}>{a.date}</span>}
+            </span>
+            <span style={{ color: a.unlocked ? "#b8860b" : "#bbb", fontWeight: "bold", fontSize: 12 }}>+{a.points}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-const NAV_ITEMS: { id: Screen; label: string; icon: string }[] = [
-  { id: "home", label: "Главная", icon: "Home" },
-  { id: "character", label: "Герой", icon: "User" },
-  { id: "diary", label: "Дневник", icon: "BookOpen" },
-  { id: "leaderboard", label: "Рейтинг", icon: "Trophy" },
-  { id: "shop", label: "Магазин", icon: "ShoppingBag" },
-  { id: "achievements", label: "Достиж.", icon: "Star" },
-];
-
+/* ─── Root ─── */
 export default function Index() {
   const [screen, setScreen] = useState<Screen>("home");
   const [coins, setCoins] = useState(PLAYER.coins);
 
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
   const screenTitles: Record<Screen, string> = {
     home: "Главная",
-    character: "Персонаж",
+    character: "Герой",
     diary: "Дневник",
     leaderboard: "Рейтинг",
     shop: "Магазин",
@@ -735,66 +430,28 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(0,0%,6%)] flex flex-col max-w-md mx-auto relative">
-      {/* Scanline overlay */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-30"
-        style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)" }} />
-
-      {/* Top bar */}
-      <header className="sticky top-0 z-50 bg-[hsl(0,0%,6%)] border-b border-[hsl(0,0%,14%)]">
-        {/* Logo row */}
-        <div className="px-4 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
-            <span className="font-display text-base font-bold text-[hsl(45,100%,60%)] tracking-[0.2em] uppercase">NEXUS</span>
-            <span className="text-[10px] text-muted-foreground font-mono border border-[hsl(0,0%,20%)] px-1.5 py-0.5">RPG</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,70%,45%)]" style={{ animation: "pulse 3s ease-in-out infinite" }} />
-            <span className="text-[10px] text-muted-foreground font-mono">В сети</span>
-          </div>
+    <div className="heroes-root">
+      {/* ── Header ── */}
+      <header className="heroes-header">
+        <div className="heroes-header-title">
+          <span className="heroes-header-wings">🦅</span>
+          <span className="heroes-header-text">Г Е Р О И</span>
+          <span className="heroes-header-wings">🦅</span>
         </div>
-        {/* Resources row */}
-        <div className="px-3 pb-2.5 flex items-center gap-2">
-          {/* Монеты */}
-          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] px-2.5 py-1.5"
-            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
-            <span className="text-base leading-none">🪙</span>
-            <div className="min-w-0">
-              <div className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-none mb-0.5">Монеты</div>
-              <div className="font-display text-sm font-bold text-white leading-none">{coins.toLocaleString()}</div>
-            </div>
-          </div>
-          {/* Золото */}
-          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(45,100%,35%)] px-2.5 py-1.5"
-            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
-            <span className="text-base leading-none">⭐</span>
-            <div className="min-w-0">
-              <div className="text-[9px] text-[hsl(45,100%,50%)] font-mono uppercase tracking-wider leading-none mb-0.5">Золото</div>
-              <div className="font-display text-sm font-bold text-[hsl(45,100%,60%)] leading-none">{PLAYER.gold.toLocaleString()}</div>
-            </div>
-          </div>
-          {/* Кристаллы */}
-          <div className="flex-1 flex items-center gap-1.5 bg-[hsl(0,0%,9%)] border border-[hsl(195,100%,30%)] px-2.5 py-1.5"
-            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}>
-            <span className="text-base leading-none">💎</span>
-            <div className="min-w-0">
-              <div className="text-[9px] text-[hsl(195,100%,40%)] font-mono uppercase tracking-wider leading-none mb-0.5">Кристаллы</div>
-              <div className="font-display text-sm font-bold text-[hsl(195,100%,55%)] leading-none">{PLAYER.crystals}</div>
-            </div>
-          </div>
+        <div className="heroes-header-stats">
+          <span className="heroes-header-avatar">🧙 {PLAYER.name}</span>
+          <span className="heroes-stat-pill">❤️ {PLAYER.attack}</span>
+          <span className="heroes-stat-pill">🪙 {coins.toLocaleString()}</span>
+          <span className="heroes-stat-pill">⚔️ {PLAYER.defence}</span>
+          <span className="heroes-stat-pill">💎 {PLAYER.crystals}</span>
+          <span className="heroes-stat-pill">⭐ {PLAYER.gold.toLocaleString()}</span>
+          <span className="heroes-stat-pill">✖ {PLAYER.level}/20</span>
         </div>
+        <div className="heroes-header-time">⏱ {timeStr}</div>
       </header>
 
-      {/* Page title */}
-      <div className="px-4 pt-4 pb-1 z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">/ {screenTitles[screen]}</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto px-4 pb-4 pt-2 z-10">
+      {/* ── Content ── */}
+      <main className="heroes-main">
         {screen === "home" && <HomeScreen />}
         {screen === "character" && <CharacterScreen coins={coins} setCoins={setCoins} />}
         {screen === "diary" && <DiaryScreen />}
@@ -803,31 +460,46 @@ export default function Index() {
         {screen === "achievements" && <AchievementsScreen />}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="sticky bottom-0 z-50 bg-[hsl(0,0%,6%)] border-t border-[hsl(0,0%,14%)] px-2 py-2">
-        <div className="grid grid-cols-6 gap-0.5">
-          {NAV_ITEMS.map(item => {
-            const active = screen === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setScreen(item.id)}
-                className={`flex flex-col items-center gap-0.5 py-2 px-1 transition-all duration-150 ${
-                  active ? "text-[hsl(45,100%,60%)]" : "text-muted-foreground hover:text-white"
-                }`}
-              >
-                <div className={`relative transition-transform ${active ? "scale-110" : ""}`}>
-                  <Icon name={item.icon} fallback="Circle" size={17} />
-                  {active && (
-                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-[hsl(45,100%,60%)] rounded-full" />
-                  )}
-                </div>
-                <span className="text-[9px] font-mono uppercase tracking-wider leading-none">{item.label}</span>
-              </button>
-            );
-          })}
+      {/* ── Footer nav ── */}
+      <footer className="heroes-footer">
+        <div className="heroes-footer-nav">
+          {([
+            { id: "home", label: "Поиск" },
+            { id: "leaderboard", label: "Форум" },
+            { id: "diary", label: "Помощь" },
+            { id: "home", label: "Правила" },
+            { id: "home", label: "Настройки" },
+          ] as { id: Screen; label: string }[]).map((item, i) => (
+            <button key={i} className="heroes-footer-link" onClick={() => setScreen(item.id)}>
+              {item.label}
+            </button>
+          ))}
         </div>
-      </nav>
+        <div className="heroes-footer-time">🕐 {timeStr}</div>
+
+        <div className="heroes-tab-nav">
+          {([
+            { id: "home", label: "🌲 Главная" },
+            { id: "character", label: "🧙 Герой" },
+            { id: "diary", label: "📜 Дневник" },
+            { id: "leaderboard", label: "🏆 Рейтинг" },
+            { id: "shop", label: "🛒 Магазин" },
+            { id: "achievements", label: "⭐ Достиж." },
+          ] as { id: Screen; label: string }[]).map((item) => (
+            <button
+              key={item.id}
+              className={`heroes-tab-btn ${screen === item.id ? "heroes-tab-btn--active" : ""}`}
+              onClick={() => setScreen(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="heroes-footer-copy">
+          © 2025 Герои · <a href="https://poehali.dev/help" target="_blank" rel="noreferrer" className="heroes-footer-link">Поддержка</a>
+        </div>
+      </footer>
     </div>
   );
 }
