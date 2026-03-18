@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type React from "react";
 import Icon from "@/components/ui/icon";
 
 type Screen = "home" | "character" | "diary" | "leaderboard" | "shop" | "achievements";
@@ -252,9 +253,8 @@ function upgradeCost(value: number) {
   return Math.floor(100 * Math.pow(1.18, value - 40));
 }
 
-function CharacterScreen() {
+function CharacterScreen({ coins, setCoins }: { coins: number; setCoins: React.Dispatch<React.SetStateAction<number>> }) {
   const [stats, setStats] = useState({ ...PLAYER.stats });
-  const [coins, setCoins] = useState(PLAYER.coins);
   const [flash, setFlash] = useState<StatKey | null>(null);
   const [noMoney, setNoMoney] = useState<StatKey | null>(null);
 
@@ -723,6 +723,7 @@ const NAV_ITEMS: { id: Screen; label: string; icon: string }[] = [
 
 export default function Index() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [coins, setCoins] = useState(PLAYER.coins);
 
   const screenTitles: Record<Screen, string> = {
     home: "Главная",
@@ -761,7 +762,7 @@ export default function Index() {
             <span className="text-base leading-none">🪙</span>
             <div className="min-w-0">
               <div className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-none mb-0.5">Монеты</div>
-              <div className="font-display text-sm font-bold text-white leading-none">{PLAYER.coins.toLocaleString()}</div>
+              <div className="font-display text-sm font-bold text-white leading-none">{coins.toLocaleString()}</div>
             </div>
           </div>
           {/* Золото */}
@@ -795,7 +796,7 @@ export default function Index() {
       {/* Content */}
       <main className="flex-1 overflow-y-auto px-4 pb-4 pt-2 z-10">
         {screen === "home" && <HomeScreen />}
-        {screen === "character" && <CharacterScreen />}
+        {screen === "character" && <CharacterScreen coins={coins} setCoins={setCoins} />}
         {screen === "diary" && <DiaryScreen />}
         {screen === "leaderboard" && <LeaderboardScreen />}
         {screen === "shop" && <ShopScreen />}
