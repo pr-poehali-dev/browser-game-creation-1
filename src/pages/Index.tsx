@@ -238,8 +238,39 @@ function HomeScreen() {
   );
 }
 
+type StatKey = "strength" | "agility" | "intellect" | "endurance" | "luck";
+
+const STAT_META: Record<StatKey, { label: string; color: string; emoji: string }> = {
+  strength:   { label: "Сила",        color: "gold",  emoji: "⚔️" },
+  agility:    { label: "Ловкость",    color: "gold",  emoji: "🏃" },
+  intellect:  { label: "Интеллект",   color: "cyan",  emoji: "🔮" },
+  endurance:  { label: "Выносливость",color: "green", emoji: "🛡️" },
+  luck:       { label: "Удача",       color: "cyan",  emoji: "🍀" },
+};
+
+function upgradeCost(value: number) {
+  return Math.floor(100 * Math.pow(1.18, value - 40));
+}
+
 function CharacterScreen() {
-  const stats = PLAYER.stats;
+  const [stats, setStats] = useState({ ...PLAYER.stats });
+  const [coins, setCoins] = useState(PLAYER.coins);
+  const [flash, setFlash] = useState<StatKey | null>(null);
+  const [noMoney, setNoMoney] = useState<StatKey | null>(null);
+
+  function upgrade(key: StatKey) {
+    const cost = upgradeCost(stats[key]);
+    if (coins < cost) {
+      setNoMoney(key);
+      setTimeout(() => setNoMoney(null), 800);
+      return;
+    }
+    setCoins(c => c - cost);
+    setStats(s => ({ ...s, [key]: s[key] + 1 }));
+    setFlash(key);
+    setTimeout(() => setFlash(null), 600);
+  }
+
   return (
     <div className="animate-slide-up space-y-4">
       <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4"
@@ -263,18 +294,78 @@ function CharacterScreen() {
         </div>
       </div>
 
+      {/* Balance */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-base">🪙</span>
+          <span className="font-display text-sm font-bold text-white">{coins.toLocaleString()}</span>
+          <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">монет</span>
+        </div>
+        <span className="text-[10px] text-muted-foreground font-mono">Цена растёт с каждым уровнем</span>
+      </div>
+
       <div>
         <div className="flex items-center gap-2 mb-2">
           <div className="w-2 h-2 bg-[hsl(45,100%,60%)] rotate-45" />
           <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Характеристики</h3>
         </div>
-        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4 space-y-3"
+        <div className="bg-[hsl(0,0%,9%)] border border-[hsl(0,0%,16%)] p-4 space-y-4"
           style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-          <StatBar label="Сила" value={stats.strength} />
-          <StatBar label="Ловкость" value={stats.agility} />
-          <StatBar label="Интеллект" value={stats.intellect} color="cyan" />
-          <StatBar label="Выносливость" value={stats.endurance} color="green" />
-          <StatBar label="Удача" value={stats.luck} color="cyan" />
+          {(Object.keys(stats) as StatKey[]).map(key => {
+            const meta = STAT_META[key];
+            const val = stats[key];
+            const cost = upgradeCost(val);
+            const canAfford = coins >= cost;
+            const isFlash = flash === key;
+            const isNoMoney = noMoney === key;
+            return (
+              <div key={key}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-sm leading-none">{meta.emoji}</span>
+                  <span className="text-xs text-muted-foreground font-mono uppercase tracking-widest flex-1">{meta.label}</span>
+                  <span className={`font-display text-base font-bold transition-all duration-300 ${isFlash ? "text-[hsl(145,70%,55%)] scale-110" : "text-white"}`}>
+                    {val}
+                  </span>
+                  <button
+                    onClick={() => upgrade(key)}
+                    className={`flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${
+                      isNoMoney
+                        ? "bg-[hsl(0,85%,30%)] border border-[hsl(0,85%,45%)] text-[hsl(0,85%,70%)]"
+                        : canAfford
+                        ? "bg-[hsl(45,100%,60%)] text-[hsl(0,0%,6%)] hover:bg-[hsl(45,100%,70%)] hover:-translate-y-px active:scale-95"
+                        : "bg-[hsl(0,0%,12%)] border border-[hsl(0,0%,20%)] text-muted-foreground cursor-not-allowed"
+                    }`}
+                    style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}
+                  >
+                    {isNoMoney ? (
+                      <span>Мало!</span>
+                    ) : (
+                      <>
+                        <span>🪙</span>
+                        <span>{cost.toLocaleString()}</span>
+                        <span className="text-[9px] opacity-70">+1</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="bg-[hsl(0,0%,12%)] h-1.5 overflow-hidden relative">
+                  <div
+                    className={`h-full transition-all duration-500 ${
+                      meta.color === "cyan"
+                        ? "bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(195,100%,70%)]"
+                        : meta.color === "green"
+                        ? "bg-gradient-to-r from-[hsl(145,70%,45%)] to-[hsl(145,70%,65%)]"
+                        : "bg-gradient-to-r from-[hsl(45,100%,60%)] to-[hsl(45,100%,75%)]"
+                    }`}
+                    style={{ width: `${Math.min(val, 100)}%` }}
+                  />
+                  {isFlash && (
+                    <div className="absolute inset-0 bg-[hsl(145,70%,55%,0.4)] animate-pulse" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
